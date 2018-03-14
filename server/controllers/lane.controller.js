@@ -25,7 +25,6 @@ export function addLane(req, res) {
   });
 }
 
-//get all lanes
 export function getLanes(req, res) {
   Lane.find().exec((err, lanes) => {
     if (err) {
@@ -35,12 +34,24 @@ export function getLanes(req, res) {
   });
 }
 
-//delete lane
 export function deleteLane(req, res) {
   Lane.findOne({ id: req.params.laneId }).exec((err, lane) => {
     if (err) {
       res.status(500).send(err);
     }
+
+    //delete note from lane
+    lane.notes.forEach((note) => {
+      Note.findOne({ id: note.id }).exec((err, note) => {
+        if (err) {
+          res.status(500).send(err);
+        }
+
+        note.remove(() => {
+          res.status(200).end();
+        });
+      })
+    })
 
     lane.remove(() => {
       res.status(200).end();
@@ -48,7 +59,6 @@ export function deleteLane(req, res) {
   });
 }
 
-//edit lane
 export function editLane(req, res) {
   Lane.findOne({id: req.params.laneId})
     .then((lane) => {
